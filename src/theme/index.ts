@@ -10,8 +10,8 @@ const theme = createTheme({
         root: {
           '& .MuiInputBase-input': {
             '&:-webkit-autofill': {
-              '-webkit-box-shadow': '0 0 0 100px #121212 inset !important',
-              '-webkit-text-fill-color': '#fff !important',
+              boxShadow: '0 0 0 100px #121212 inset !important',
+              textFillColor: '#fff !important',
             }
           }
         }
