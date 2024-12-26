@@ -46,6 +46,14 @@ function SignIn() {
             label="Email Address"
             name="email"
             autoFocus
+            sx={{
+              '& .MuiInputBase-input': {
+                '&:-webkit-autofill': {
+                  '-webkit-box-shadow': '0 0 0 100px #121212 inset !important',
+                  '-webkit-text-fill-color': '#fff !important',
+                }
+              }
+            }}
           />
           <TextField
             margin="normal"
@@ -56,6 +64,14 @@ function SignIn() {
             label="Password"
             type="password"
             id="password"
+            sx={{
+              '& .MuiInputBase-input': {
+                '&:-webkit-autofill': {
+                  '-webkit-box-shadow': '0 0 0 100px #121212 inset !important',
+                  '-webkit-text-fill-color': '#fff !important',
+                }
+              }
+            }}
           />
           <Button
             type="submit"
