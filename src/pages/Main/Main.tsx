@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { usersApi, User } from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Table,
   TableBody,
@@ -11,10 +12,13 @@ import {
   Container,
   Typography,
   CircularProgress,
-  Alert
+  Alert,
+  Button,
+  Box
 } from '@mui/material';
 
 function Main() {
+  const { logout } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +56,18 @@ function Main() {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Users List
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Users List
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={logout}
+        >
+          Logout
+        </Button>
+      </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="users table">
           <TableHead>
