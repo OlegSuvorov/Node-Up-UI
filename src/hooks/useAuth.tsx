@@ -1,13 +1,18 @@
-import React, {createContext, ReactNode, useContext, useMemo} from "react";
+import React, { createContext, ReactNode, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
-type UserContextType = {
-  user: any;
-  login: (data: any) => void;
+import { User } from "../services/api";
+
+type AuthContextType = {
+  user: User | null;
+  token: string | null;
+  login: (user: User, token: string) => void;
   logout: () => void;
 };
-const AuthContext = createContext<UserContextType>({
-  user: '',
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  token: null,
   login: () => {},
   logout: () => {},
 });
@@ -18,26 +23,31 @@ type Props = {
 
 export const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useLocalStorage("user", '');
+  const [token, setToken] = useLocalStorage("token", '');
   const navigate = useNavigate();
 
-  const login = async (data: any) => {
-    setUser(data);
+  const login = (userData: User, userToken: string) => {
+    setUser(userData);
+    setToken(userToken);
     navigate("/");
   };
 
   const logout = () => {
-    setUser(null);
+    setUser('');
+    setToken('');
     navigate("/login", { replace: true });
   };
 
   const value = useMemo(
     () => ({
       user,
+      token,
       login,
       logout,
     }),
-    [user]
+    [user, token]
   );
+  
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
