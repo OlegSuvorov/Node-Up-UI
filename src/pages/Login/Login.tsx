@@ -10,14 +10,35 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useAuth } from '../../hooks/useAuth';
+import { authApi } from '../../services/api'
 
-function SignIn() {
+function Login() {
   const { login } = useAuth();
+  const [formData, setFormData] = React.useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = React.useState('')
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    await login(data.get('email'));
+    setError('')
+    
+    try {
+      const response = await authApi.login(formData)
+      login(response.user)
+    } catch (error) {
+      setError('Invalid credentials')
+      console.error('Login error:', error)
+    }
   };
 
   return (
@@ -37,6 +58,11 @@ function SignIn() {
           Sign in
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          {error && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
           <TextField
             margin="normal"
             variant="outlined"
@@ -46,6 +72,8 @@ function SignIn() {
             label="Email Address"
             name="email"
             autoFocus
+            value={formData.email}
+            onChange={handleChange}
           />
           <TextField
             margin="normal"
@@ -56,6 +84,8 @@ function SignIn() {
             label="Password"
             type="password"
             id="password"
+            value={formData.password}
+            onChange={handleChange}
           />
           <Button
             type="submit"
@@ -78,4 +108,4 @@ function SignIn() {
   );
 }
 
-export default SignIn;
+export default Login;

@@ -2,9 +2,9 @@ import React, {createContext, ReactNode, useContext, useMemo} from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
 type UserContextType = {
-  user: string
-  login: Function;
-  logout: Function
+  user: any;
+  login: (data: any) => void;
+  logout: () => void;
 };
 const AuthContext = createContext<UserContextType>({
   user: '',
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useLocalStorage("user", '');
   const navigate = useNavigate();
 
-  const login = async (data: string) => {
+  const login = async (data: any) => {
     setUser(data);
     navigate("/");
   };
