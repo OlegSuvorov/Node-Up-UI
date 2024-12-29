@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+.container {
+  padding: 20px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.users-table th,
+.users-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.users-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.users-table tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.users-table tr:hover {
+  background-color: #f5f5f5;
+}
