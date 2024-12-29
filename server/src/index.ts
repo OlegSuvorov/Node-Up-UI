@@ -4,6 +4,7 @@ import cors from 'cors'
 import { AppDataSource } from "./data-source"
 import authRoutes from './routes/auth'
 import userRoutes from './routes/users'
+import { authenticateToken } from './middleware/auth'
 
 const app = express()
 
@@ -12,7 +13,7 @@ app.use(express.json())
 
 // Routes
 app.use('/api/auth', authRoutes)
-app.use('/api/users', userRoutes)
+app.use('/api/users', authenticateToken, userRoutes)
 
 const PORT = process.env.PORT || 3001
 
