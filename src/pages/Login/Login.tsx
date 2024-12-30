@@ -34,7 +34,7 @@ function Login() {
     
     try {
       const response = await authApi.login(formData)
-      login(response.user, response.token)
+      login(response.user)
     } catch (error) {
       setError('Invalid credentials')
       console.error('Login error:', error)

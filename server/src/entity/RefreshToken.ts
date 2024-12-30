@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from "typeorm"
 import { User } from "./User"
 
-@Entity()
+@Entity("refresh_tokens")
 export class RefreshToken {
     @PrimaryGeneratedColumn()
     id!: number
@@ -9,12 +9,12 @@ export class RefreshToken {
     @Column()
     token!: string
 
-    @Column({ default: true })
+    @Column()
     isValid!: boolean
-
-    @ManyToOne(() => User, user => user.refreshTokens)
-    user!: User
 
     @CreateDateColumn()
     createdAt!: Date
+
+    @ManyToOne(() => User, user => user.refreshTokens)
+    user!: User
 }
