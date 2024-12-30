@@ -1,19 +1,27 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken'
+
+interface JWTPayload {
+    userId: number;
+    email: string;
+}
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+    const accessToken = req.cookies.accessToken
 
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' })
+    if (!accessToken) {
+        return res.status(401).json({ message: 'Access token not found' })
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!)
-        req.user = decoded
+        const payload = jwt.verify(
+            accessToken,
+            process.env.JWT_SECRET || 'your-secret-key'
+        ) as JWTPayload
+        
+        req.user = payload
         next()
     } catch (error) {
-        return res.status(403).json({ message: 'Invalid token.' })
+        return res.status(401).json({ message: 'Invalid token' })
     }
 } 

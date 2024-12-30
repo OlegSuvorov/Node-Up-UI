@@ -1,12 +1,13 @@
 import axios from 'axios'
 
-const API_URL = 'http://localhost:3001/api'
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api'
 
 const api = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
-    }
+    },
+    withCredentials: true
 })
 
 // Add token to requests if it exists
@@ -20,17 +21,54 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error)
 })
 
-// Add response interceptor to handle token expiration
+// Add refresh token functionality
+let isRefreshing = false
+let failedQueue: any[] = []
+
+const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error)
+        } else {
+            prom.resolve(token)
+        }
+    })
+    failedQueue = []
+}
+
+// Update the response interceptor
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Clear token and user data if unauthorized
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-            // Redirect to login page
-            window.location.href = '/login'
+    async (error) => {
+        const originalRequest = error.config
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject })
+                })
+                .then(() => {
+                    return api(originalRequest)
+                })
+                .catch(err => Promise.reject(err))
+            }
+
+            originalRequest._retry = true
+            isRefreshing = true
+
+            try {
+                await api.post('/auth/refresh')
+                processQueue(null)
+                return api(originalRequest)
+            } catch (refreshError) {
+                processQueue(refreshError, null)
+                window.location.href = '/login'
+                return Promise.reject(refreshError)
+            } finally {
+                isRefreshing = false
+            }
         }
+
         return Promise.reject(error)
     }
 )
@@ -74,9 +112,8 @@ export const authApi = {
         return response.data
     },
 
-    logout: () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+    logout: async () => {
+        await api.post('/auth/logout')
     }
 }
 
