@@ -112,8 +112,13 @@ export const authApi = {
         return response.data
     },
 
-    logout: async () => {
-        await api.post('/auth/logout')
+    logout: async (): Promise<void> => {
+        try {
+            await api.post('/auth/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
+            throw error;
+        }
     }
 }
 

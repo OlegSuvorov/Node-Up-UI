@@ -16,6 +16,7 @@ import {
   Button,
   Box
 } from '@mui/material';
+import { authApi } from "../../services/api";
 
 function Main() {
   const { logout } = useAuth();
@@ -37,6 +38,15 @@ function Main() {
 
     fetchUsers();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      logout();
+    } catch (error) {
+      setError("Failed to logout");
+    }
+  };
 
   if (loading) {
     return (
@@ -63,7 +73,7 @@ function Main() {
         <Button 
           variant="contained" 
           color="primary" 
-          onClick={logout}
+          onClick={handleLogout}
         >
           Logout
         </Button>
