@@ -20,26 +20,32 @@ const validationSchema = Yup.object({
     .required('First name is required')
     .min(2, 'First name must be at least 2 characters')
     .max(50, 'First name must not exceed 50 characters')
-    .matches(/^[A-Za-z\s-]+$/, 'First name can only contain letters, spaces, and hyphens'),
-  
+    .matches(
+      /^[A-Za-z\s-]+$/,
+      'First name can only contain letters, spaces, and hyphens',
+    ),
+
   lastName: Yup.string()
     .required('Last name is required')
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must not exceed 50 characters')
-    .matches(/^[A-Za-z\s-]+$/, 'Last name can only contain letters, spaces, and hyphens'),
-  
+    .matches(
+      /^[A-Za-z\s-]+$/,
+      'Last name can only contain letters, spaces, and hyphens',
+    ),
+
   email: Yup.string()
     .required('Email is required')
     .email('Invalid email format')
     .max(255, 'Email must not exceed 255 characters'),
-  
+
   password: Yup.string()
     .required('Password is required')
     .min(8, 'Password must be at least 8 characters')
     .max(50, 'Password must not exceed 50 characters')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
     ),
 });
 
@@ -83,7 +89,12 @@ function SignUp() {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
           {serverError && (
             <Typography color="error" align="center" sx={{ mb: 2 }}>
               {serverError}

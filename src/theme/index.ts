@@ -12,12 +12,12 @@ const theme = createTheme({
             '&:-webkit-autofill': {
               boxShadow: '0 0 0 100px #121212 inset !important',
               textFillColor: '#fff !important',
-            }
-          }
-        }
-      }
-    }
-  }
+            },
+          },
+        },
+      },
+    },
+  },
 });
 
-export default theme; 
+export default theme;

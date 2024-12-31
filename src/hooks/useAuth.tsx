@@ -1,7 +1,7 @@
-import React, { createContext, ReactNode, useContext, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLocalStorage } from "./useLocalStorage";
-import { User } from "../services/api";
+import React, { createContext, ReactNode, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLocalStorage } from './useLocalStorage';
+import { User } from '../services/api';
 
 type AuthContextType = {
   user: User | null;
@@ -17,20 +17,20 @@ const AuthContext = createContext<AuthContextType>({
 
 type Props = {
   children: ReactNode;
-}
+};
 
 export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useLocalStorage("user", '');
+  const [user, setUser] = useLocalStorage('user', '');
   const navigate = useNavigate();
 
   const login = (userData: User) => {
     setUser(userData);
-    navigate("/");
+    navigate('/');
   };
 
   const logout = () => {
     setUser('');
-    navigate("/login", { replace: true });
+    navigate('/login', { replace: true });
   };
 
   const value = useMemo(
@@ -39,9 +39,9 @@ export const AuthProvider = ({ children }: Props) => {
       login,
       logout,
     }),
-    [user]
+    [user],
   );
-  
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

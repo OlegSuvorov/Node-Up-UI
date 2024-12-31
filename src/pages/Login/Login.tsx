@@ -10,34 +10,34 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useAuth } from '../../hooks/useAuth';
-import { authApi } from '../../services/api'
+import { authApi } from '../../services/api';
 
 function Login() {
   const { login } = useAuth();
   const [formData, setFormData] = React.useState({
     email: '',
-    password: ''
+    password: '',
   });
-  const [error, setError] = React.useState('')
+  const [error, setError] = React.useState('');
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('')
-    
+    setError('');
+
     try {
-      const response = await authApi.login(formData)
-      login(response.user)
+      const response = await authApi.login(formData);
+      login(response.user);
     } catch (error) {
-      setError('Invalid credentials')
-      console.error('Login error:', error)
+      setError('Invalid credentials');
+      console.error('Login error:', error);
     }
   };
 
