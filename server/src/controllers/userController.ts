@@ -8,21 +8,31 @@ export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || '';
     const skip = (page - 1) * limit;
 
-    const [users, total] = await userRepository.findAndCount({
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ],
-      skip,
-      take: limit,
-    });
+    const queryBuilder = userRepository.createQueryBuilder('user');
+
+    if (search) {
+      queryBuilder.where(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.first_name) LIKE LOWER(:search) OR LOWER(user.last_name) LIKE LOWER(:search))',
+        { search: `%${search}%` },
+      );
+    }
+
+    const [users, total] = await queryBuilder
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.isActive',
+        'user.createdAt',
+        'user.updatedAt',
+      ])
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     res.json({
       items: users,

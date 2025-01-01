@@ -79,6 +79,7 @@ export interface User {
 export interface PaginationParams {
   page: number;
   limit: number;
+  search?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -121,6 +122,7 @@ export const usersApi = {
       params: {
         page: params.page,
         limit: params.limit,
+        search: params.search,
       },
     });
     return response.data;

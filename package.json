@@ -16,6 +16,7 @@
     "@types/react-dom": "^18.2.19",
     "axios": "^1.7.9",
     "formik": "^2.4.6",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
@@ -59,6 +60,9 @@
     "arrowParens": "always",
     "endOfLine": "lf",
     "htmlWhitespaceSensitivity": "ignore",
-    "quoteProps": "as-needed"   
+    "quoteProps": "as-needed"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13"
   }
 }

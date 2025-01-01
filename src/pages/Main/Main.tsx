@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { usersApi, User } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -37,6 +37,7 @@ import {
   UpdateFormData,
 } from '../../components/UpdateUserModal';
 import { useSearchParams } from 'react-router-dom';
+import debounce from 'lodash/debounce';
 
 function Main() {
   const { logout } = useAuth();
@@ -48,16 +49,37 @@ function Main() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get('search') || '',
+  );
 
   // Get pagination params from URL or use defaults
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '5');
 
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((search: string) => {
+      setSearchParams({ page: '1', limit: limit.toString(), search });
+    }, 500),
+    [],
+  );
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const data = await usersApi.getAll({ page, limit });
+        const data = await usersApi.getAll({
+          page,
+          limit,
+          search: searchParams.get('search') || '',
+        });
         setUsers(data.items);
         setTotalUsers(data.total);
         setError(null);
@@ -69,7 +91,7 @@ function Main() {
     };
 
     fetchUsers();
-  }, [page, limit]);
+  }, [page, limit, searchParams]);
 
   const handleLogout = async () => {
     try {
@@ -190,9 +212,18 @@ function Main() {
         <Typography variant="h4" component="h1">
           Users List
         </Typography>
-        <Button variant="contained" color="primary" onClick={handleLogout}>
-          Logout
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            size="small"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            sx={{ width: 250 }}
+          />
+          <Button variant="contained" color="primary" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Box>
       </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="users table">
