@@ -26,6 +26,10 @@ import {
 import { authApi } from '../../services/api';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  UpdateUserModal,
+  UpdateFormData,
+} from '../../components/UpdateUserModal';
 
 function Main() {
   const { logout } = useAuth();
@@ -35,11 +39,6 @@ function Main() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [updateFormData, setUpdateFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-  });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -67,11 +66,6 @@ function Main() {
 
   const handleUpdateClick = (user: User) => {
     setSelectedUser(user);
-    setUpdateFormData({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-    });
     setIsUpdateModalOpen(true);
   };
 
@@ -80,11 +74,11 @@ function Main() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (formData: UpdateFormData) => {
     if (!selectedUser) return;
 
     try {
-      await usersApi.update(selectedUser.id, updateFormData);
+      await usersApi.update(selectedUser.id, formData);
       const updatedUsers = await usersApi.getAll();
       setUsers(updatedUsers);
       setIsUpdateModalOpen(false);
@@ -197,56 +191,12 @@ function Main() {
         </Table>
       </TableContainer>
 
-      <Dialog
+      <UpdateUserModal
         open={isUpdateModalOpen}
         onClose={() => setIsUpdateModalOpen(false)}
-      >
-        <DialogTitle>Update User</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="First Name"
-            fullWidth
-            value={updateFormData.firstName}
-            onChange={(e) =>
-              setUpdateFormData({
-                ...updateFormData,
-                firstName: e.target.value,
-              })
-            }
-          />
-          <TextField
-            margin="dense"
-            label="Last Name"
-            fullWidth
-            value={updateFormData.lastName}
-            onChange={(e) =>
-              setUpdateFormData({
-                ...updateFormData,
-                lastName: e.target.value,
-              })
-            }
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            type="email"
-            fullWidth
-            value={updateFormData.email}
-            onChange={(e) =>
-              setUpdateFormData({
-                ...updateFormData,
-                email: e.target.value,
-              })
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsUpdateModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleUpdate}>Update</Button>
-        </DialogActions>
-      </Dialog>
+        onUpdate={handleUpdate}
+        user={selectedUser}
+      />
 
       <Dialog
         open={isDeleteDialogOpen}
