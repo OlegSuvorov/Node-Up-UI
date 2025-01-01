@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { refreshTokenHandler } from './auth/refreshToken';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -10,20 +11,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-const processQueue = (error: any) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve();
-    }
-  });
-  failedQueue = [];
-};
-
 // Update the response interceptor
 api.interceptors.response.use(
   (response) => response,
@@ -31,32 +18,30 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
+      if (refreshTokenHandler.isRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          refreshTokenHandler.failedQueue.push({ resolve, reject });
         })
-          .then(() => {
-            return api(originalRequest);
-          })
+          .then(() => api(originalRequest))
           .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
+      refreshTokenHandler.isRefreshing = true;
 
       try {
         await api.post('/auth/refresh');
-        processQueue(null);
+        refreshTokenHandler.processQueue(null);
         return api(originalRequest);
       } catch (refreshError: unknown) {
         const axiosError = refreshError as AxiosError;
-        processQueue(axiosError);
+        refreshTokenHandler.processQueue(axiosError);
         if (axiosError.response?.status === 401) {
           window.location.href = '/login';
         }
         return Promise.reject(axiosError);
       } finally {
-        isRefreshing = false;
+        refreshTokenHandler.isRefreshing = false;
       }
     }
 
