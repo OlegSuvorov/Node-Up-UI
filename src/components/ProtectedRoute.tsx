@@ -7,11 +7,7 @@ type Props = {
 };
 
 export const ProtectedRoute = ({ children }: Props) => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" />;

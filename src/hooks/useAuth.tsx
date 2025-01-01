@@ -6,14 +6,12 @@ type AuthContextType = {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
-  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
   logout: () => {},
-  isLoading: true,
 });
 
 type Props = {
@@ -22,23 +20,7 @@ type Props = {
 
 export const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        const response = await authApi.verify();
-        setUser(response.user);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    verifyAuth();
-  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -60,9 +42,8 @@ export const AuthProvider = ({ children }: Props) => {
       user,
       login,
       logout,
-      isLoading,
     }),
-    [user, isLoading]
+    [user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
