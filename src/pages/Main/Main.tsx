@@ -22,6 +22,12 @@ import {
   DialogActions,
   TextField,
   DialogContentText,
+  Pagination,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
 } from '@mui/material';
 import { authApi } from '../../services/api';
 import EditIcon from '@mui/icons-material/Edit';
@@ -30,21 +36,31 @@ import {
   UpdateUserModal,
   UpdateFormData,
 } from '../../components/UpdateUserModal';
+import { useSearchParams } from 'react-router-dom';
 
 function Main() {
   const { logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  // Get pagination params from URL or use defaults
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '5');
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await usersApi.getAll();
-        setUsers(data);
+        setLoading(true);
+        const data = await usersApi.getAll({ page, limit });
+        setUsers(data.items);
+        setTotalUsers(data.total);
+        setError(null);
       } catch (err) {
         setError('Failed to fetch users');
       } finally {
@@ -53,7 +69,7 @@ function Main() {
     };
 
     fetchUsers();
-  }, []);
+  }, [page, limit]);
 
   const handleLogout = async () => {
     try {
@@ -79,8 +95,8 @@ function Main() {
 
     try {
       await usersApi.update(selectedUser.id, formData);
-      const updatedUsers = await usersApi.getAll();
-      setUsers(updatedUsers);
+      const updatedUsers = await usersApi.getAll({ page, limit });
+      setUsers(updatedUsers.items);
       setIsUpdateModalOpen(false);
       setError(null);
     } catch (err) {
@@ -100,6 +116,50 @@ function Main() {
       setError('Failed to delete user');
     }
   };
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setSearchParams({ page: value.toString(), limit: limit.toString() });
+  };
+
+  const handleLimitChange = (event: SelectChangeEvent<number>) => {
+    const newLimit = event.target.value as number;
+    setSearchParams({ page: '1', limit: newLimit.toString() });
+  };
+
+  const paginationControls = (
+    <Box
+      sx={{
+        mt: 3,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <FormControl variant="outlined" size="small">
+        <InputLabel>Items per page</InputLabel>
+        <Select
+          value={limit}
+          onChange={handleLimitChange}
+          label="Items per page"
+          sx={{ minWidth: 120 }}
+        >
+          <MenuItem value={5}>5</MenuItem>
+          <MenuItem value={10}>10</MenuItem>
+          <MenuItem value={15}>15</MenuItem>
+        </Select>
+      </FormControl>
+
+      <Pagination
+        count={Math.ceil(totalUsers / limit)}
+        page={page}
+        onChange={handlePageChange}
+        color="primary"
+      />
+    </Box>
+  );
 
   if (loading) {
     return (
@@ -190,6 +250,8 @@ function Main() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {paginationControls}
 
       <UpdateUserModal
         open={isUpdateModalOpen}

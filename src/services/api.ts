@@ -75,6 +75,19 @@ export interface User {
   updatedAt: string;
 }
 
+// Add these interfaces
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // Auth API
 export const authApi = {
   login: async (data: LoginData): Promise<AuthResponse> => {
@@ -101,8 +114,15 @@ export const authApi = {
 
 // Users API
 export const usersApi = {
-  getAll: async (): Promise<User[]> => {
-    const response = await api.get('/users');
+  getAll: async (
+    params: PaginationParams,
+  ): Promise<PaginatedResponse<User>> => {
+    const response = await api.get('/users', {
+      params: {
+        page: params.page,
+        limit: params.limit,
+      },
+    });
     return response.data;
   },
 

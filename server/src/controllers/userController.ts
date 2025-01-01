@@ -6,7 +6,11 @@ const userRepository = AppDataSource.getRepository(User);
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await userRepository.find({
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await userRepository.findAndCount({
       select: [
         'id',
         'email',
@@ -16,8 +20,16 @@ export const getAllUsers = async (req: Request, res: Response) => {
         'createdAt',
         'updatedAt',
       ],
+      skip,
+      take: limit,
     });
-    res.json(users);
+
+    res.json({
+      items: users,
+      total,
+      page,
+      limit,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users' });
   }
