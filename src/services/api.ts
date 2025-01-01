@@ -74,7 +74,6 @@ export interface RegisterData extends LoginData {
 
 export interface AuthResponse {
   user: User;
-  token: string;
 }
 
 // User types
@@ -95,6 +94,11 @@ export const authApi = {
     return response.data;
   },
 
+  verify: async (): Promise<AuthResponse> => {
+    const response = await api.get('/auth/verify');
+    return response.data;
+  },
+
   register: async (
     data: RegisterData,
   ): Promise<{ message: string; user: User }> => {
@@ -103,12 +107,7 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    try {
-      await api.post('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
+    await api.post('/auth/logout');
   },
 };
 

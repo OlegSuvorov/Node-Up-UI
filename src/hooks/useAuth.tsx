@@ -1,18 +1,19 @@
-import React, { createContext, ReactNode, useContext, useMemo } from 'react';
+import React, { createContext, ReactNode, useContext, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLocalStorage } from './useLocalStorage';
-import { User } from '../services/api';
+import { User, authApi } from '../services/api';
 
 type AuthContextType = {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
   logout: () => {},
+  isLoading: true,
 });
 
 type Props = {
@@ -20,17 +21,38 @@ type Props = {
 };
 
 export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useLocalStorage('user', '');
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        const response = await authApi.verify();
+        setUser(response.user);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyAuth();
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
     navigate('/');
   };
 
-  const logout = () => {
-    setUser('');
-    navigate('/login', { replace: true });
+  const logout = async () => {
+    try {
+      await authApi.logout();
+      setUser(null);
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const value = useMemo(
@@ -38,8 +60,9 @@ export const AuthProvider = ({ children }: Props) => {
       user,
       login,
       logout,
+      isLoading,
     }),
-    [user],
+    [user, isLoading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
