@@ -124,15 +124,29 @@ export const refresh = async (req: Request, res: Response) => {
     });
     await refreshTokenRepository.save(newRefreshTokenDoc);
 
-    // Set new refresh token in cookie
+    // Set new tokens in cookies
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      domain:
+        process.env.NODE_ENV === 'production' ? 'your-domain.com' : 'localhost',
+      path: '/',
+    });
+
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      domain:
+        process.env.NODE_ENV === 'production' ? 'your-domain.com' : 'localhost',
+      path: '/',
     });
 
-    res.json({ token: accessToken });
+    // Send success response
+    res.json({ message: 'Tokens refreshed successfully' });
   } catch (error) {
     console.error('Refresh token error:', error);
     res.status(401).json({ message: 'Invalid refresh token' });

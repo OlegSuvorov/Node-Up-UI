@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -48,10 +48,13 @@ api.interceptors.response.use(
         await api.post('/auth/refresh');
         processQueue(null);
         return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError);
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+      } catch (refreshError: unknown) {
+        const axiosError = refreshError as AxiosError;
+        processQueue(axiosError);
+        if (axiosError.response?.status === 401) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(axiosError);
       } finally {
         isRefreshing = false;
       }

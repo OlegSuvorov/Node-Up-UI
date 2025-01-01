@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: Props) => {
     setIsLoading(true);
     try {
       const { user: userData } = await authApi.verify();
+      console.log('User data:', userData);
       setUser(userData);
     } catch (error) {
       setUser(null);
