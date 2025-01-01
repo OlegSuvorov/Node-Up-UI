@@ -1,5 +1,12 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { refreshTokenHandler } from './auth/refreshToken';
+
+// Add this type declaration
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+  }
+}
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -11,13 +18,31 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Add this before the response interceptor
+api.interceptors.request.use(
+  (config) => {
+    if (config.skipAuthRefresh) {
+      delete config.skipAuthRefresh;
+      return config;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
 // Update the response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== '/auth/refresh'
+    ) {
       if (refreshTokenHandler.isRefreshing) {
         return new Promise((resolve, reject) => {
           refreshTokenHandler.failedQueue.push({ resolve, reject });
@@ -30,18 +55,24 @@ api.interceptors.response.use(
       refreshTokenHandler.isRefreshing = true;
 
       try {
-        await api.post('/auth/refresh');
+        await api.post(
+          '/auth/refresh',
+          {},
+          {
+            skipAuthRefresh: true,
+          },
+        );
         refreshTokenHandler.processQueue(null);
         return api(originalRequest);
       } catch (refreshError: unknown) {
         const axiosError = refreshError as AxiosError;
         refreshTokenHandler.processQueue(axiosError);
+        refreshTokenHandler.isRefreshing = false;
         if (axiosError.response?.status === 401) {
+          console.log('Redirecting to login');
           window.location.href = '/login';
         }
         return Promise.reject(axiosError);
-      } finally {
-        refreshTokenHandler.isRefreshing = false;
       }
     }
 
