@@ -284,12 +284,14 @@ function Main() {
 
       {paginationControls}
 
-      <UpdateUserModal
-        open={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        onUpdate={handleUpdate}
-        user={selectedUser}
-      />
+      {isUpdateModalOpen && selectedUser && (
+        <UpdateUserModal
+          open={isUpdateModalOpen}
+          onClose={() => setIsUpdateModalOpen(false)}
+          onUpdate={handleUpdate}
+          user={selectedUser}
+        />
+      )}
 
       <Dialog
         open={isDeleteDialogOpen}

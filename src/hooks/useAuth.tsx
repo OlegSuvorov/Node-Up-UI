@@ -37,15 +37,11 @@ export const AuthProvider = ({ children }: Props) => {
   const verifyAuth = async () => {
     setIsLoading(true);
     try {
-      console.log('Verifying auth');
       const { user: userData } = await authApi.verify();
-      console.log('User data:', userData);
       setUser(userData);
     } catch (error) {
-      console.log('Error verifying auth:', error);
       setUser(null);
     } finally {
-      console.log('Setting isLoading to false');
       setIsLoading(false);
     }
   };

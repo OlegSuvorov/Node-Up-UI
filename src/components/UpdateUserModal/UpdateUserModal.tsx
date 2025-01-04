@@ -59,13 +59,6 @@ export function UpdateUserModal({
 }: UpdateUserModalProps) {
   const [serverError, setServerError] = React.useState('');
 
-  // Reset form when modal closes
-  React.useEffect(() => {
-    if (!open) {
-      formik.resetForm();
-    }
-  }, [open]);
-
   const formik = useFormik({
     initialValues: {
       firstName: user?.firstName || '',
@@ -90,17 +83,10 @@ export function UpdateUserModal({
   });
 
   const isUpdateDisabled =
-    formik.isSubmitting ||
-    (Object.keys(formik.touched).length > 0 && !formik.isValid);
+    formik.isSubmitting || !formik.dirty || !formik.isValid;
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        onClose();
-        formik.resetForm();
-      }}
-    >
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle>Update User</DialogTitle>
       <DialogContent>
         {serverError && (
