@@ -5,6 +5,8 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/userController';
+import { validateRequest } from '../middleware/validateRequest';
+import { updateUserValidator } from '../middleware/validators';
 
 const router = express.Router();
 
@@ -15,7 +17,7 @@ router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 
 // Update user
-router.put('/:id', updateUser);
+router.put('/:id', updateUserValidator, validateRequest, updateUser);
 
 // Delete user
 router.delete('/:id', deleteUser);

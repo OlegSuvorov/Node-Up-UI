@@ -108,6 +108,11 @@ export const refresh = async (req: Request, res: Response) => {
       process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret-key',
     ) as { userId: number };
 
+    // Verify payload userId matches saved token's user
+    if (!savedToken.user?.id || payload.userId !== savedToken.user.id) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+
     // Generate new tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
       savedToken.user,

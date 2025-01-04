@@ -41,3 +41,39 @@ export const loginValidator = [
 
   body('password').notEmpty().withMessage('Password is required'),
 ];
+
+export const updateUserValidator = [
+  body('firstName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .matches(/^[A-Za-z\s-]+$/)
+    .withMessage(
+      'First name must be 2-50 characters long and can only contain letters, spaces, and hyphens',
+    ),
+
+  body('lastName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .matches(/^[A-Za-z\s-]+$/)
+    .withMessage(
+      'Last name must be 2-50 characters long and can only contain letters, spaces, and hyphens',
+    ),
+
+  body('email')
+    .optional()
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 255 })
+    .withMessage('Please provide a valid email address'),
+
+  body('password')
+    .optional()
+    .isLength({ min: 8, max: 50 })
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage(
+      'Password must be 8-50 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    ),
+];
