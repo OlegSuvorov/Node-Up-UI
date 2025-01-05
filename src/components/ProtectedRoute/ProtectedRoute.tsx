@@ -7,19 +7,19 @@ type Props = {
 };
 
 export const ProtectedRoute = ({ children }: Props) => {
-  const { user, isLoading, verifyAuth } = useAuth();
+  const { user, isLoading, verifyAuth, isVerified } = useAuth();
 
   useEffect(() => {
-    if (!user) {
+    if (!isVerified) {
       verifyAuth();
     }
-  }, [user, verifyAuth]);
+  }, [isVerified, verifyAuth]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  if (isVerified && !user) {
     return <Navigate to="/login" />;
   }
 

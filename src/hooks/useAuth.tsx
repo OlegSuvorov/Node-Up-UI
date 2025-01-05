@@ -14,6 +14,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   isLoading: boolean;
   verifyAuth: () => Promise<void>;
+  isVerified: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   isLoading: false,
   verifyAuth: async () => {},
+  isVerified: false,
 });
 
 type Props = {
@@ -31,6 +33,7 @@ type Props = {
 export const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
 
   const verifyAuth = async () => {
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }: Props) => {
     } catch (error) {
       setUser(null);
     } finally {
+      setIsVerified(true);
       setIsLoading(false);
     }
   };
@@ -78,8 +82,9 @@ export const AuthProvider = ({ children }: Props) => {
       logout,
       isLoading,
       verifyAuth,
+      isVerified,
     }),
-    [user, isLoading],
+    [user, isLoading, isVerified],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
