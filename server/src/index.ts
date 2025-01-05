@@ -3,14 +3,12 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import { createClient } from 'redis';
+import { RedisStore } from 'connect-redis';
 import { AppDataSource } from './data-source';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import { authenticateSession } from './middleware/auth';
 import cookieParser from 'cookie-parser';
-
-const RedisStore = require('connect-redis')(session);
-const app = express();
 
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
@@ -22,6 +20,7 @@ const redisStore = new RedisStore({
   prefix: 'session:',
 });
 
+const app = express();
 
 app.use(
   session({
