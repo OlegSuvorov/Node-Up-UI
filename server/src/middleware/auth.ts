@@ -1,31 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
 
-interface JWTPayload {
-  userId: number;
-  email: string;
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+    email: string;
+  }
 }
 
-export const authenticateToken = (
+export const authenticateSession = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const accessToken = req.cookies.accessToken;
-
-  if (!accessToken) {
-    return res.status(401).json({ message: 'Access token not found' });
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Not authenticated' });
   }
-
-  try {
-    const payload = jwt.verify(
-      accessToken,
-      process.env.JWT_SECRET || 'your-secret-key',
-    ) as JWTPayload;
-
-    req.user = payload;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Invalid token' });
-  }
+  next();
 };
