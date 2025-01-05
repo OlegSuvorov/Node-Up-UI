@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -8,20 +8,14 @@ type Props = {
 
 export const ProtectedRoute = ({ children }: Props) => {
   const { user, isLoading, verifyAuth } = useAuth();
-  const [isVerifying, setIsVerifying] = useState(!user);
 
   useEffect(() => {
-    const verify = async () => {
-      if (!user) {
-        await verifyAuth();
-      }
-      setIsVerifying(false);
-    };
-
-    verify();
+    if (!user) {
+      verifyAuth();
+    }
   }, [user, verifyAuth]);
 
-  if (isLoading || isVerifying) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 

@@ -3,7 +3,6 @@ import React, {
   ReactNode,
   useContext,
   useState,
-  useEffect,
   useMemo,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,16 +10,16 @@ import { User, authApi } from '../services/api';
 
 type AuthContextType = {
   user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   isLoading: boolean;
   verifyAuth: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => {},
-  logout: () => {},
+  login: async () => {},
+  logout: async () => {},
   isLoading: false,
   verifyAuth: async () => {},
 });
@@ -46,18 +45,29 @@ export const AuthProvider = ({ children }: Props) => {
     }
   };
 
-  const login = (userData: User) => {
-    setUser(userData);
-    navigate('/');
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const { user: userData } = await authApi.login({ email, password });
+      setUser(userData);
+      navigate('/');
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
+    setIsLoading(true);
     try {
       await authApi.logout();
       setUser(null);
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

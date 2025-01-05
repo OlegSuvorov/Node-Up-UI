@@ -1,12 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { refreshTokenHandler } from './auth/refreshToken';
-
-// Add this type declaration
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    skipAuthRefresh?: boolean;
-  }
-}
+import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -15,72 +7,9 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  withCredentials: true, // Important for cookies
 });
 
-// Add this before the response interceptor
-api.interceptors.request.use(
-  (config) => {
-    if (config.skipAuthRefresh) {
-      delete config.skipAuthRefresh;
-      return config;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
-
-// Update the response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      originalRequest.url !== '/auth/refresh'
-    ) {
-      if (refreshTokenHandler.isRefreshing) {
-        return new Promise((resolve, reject) => {
-          refreshTokenHandler.failedQueue.push({ resolve, reject });
-        })
-          .then(() => api(originalRequest))
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      refreshTokenHandler.isRefreshing = true;
-
-      try {
-        await api.post(
-          '/auth/refresh',
-          {},
-          {
-            skipAuthRefresh: true,
-          },
-        );
-        refreshTokenHandler.processQueue(null);
-        return api(originalRequest);
-      } catch (refreshError: unknown) {
-        const axiosError = refreshError as AxiosError;
-        refreshTokenHandler.processQueue(axiosError);
-        refreshTokenHandler.isRefreshing = false;
-        if (axiosError.response?.status === 401) {
-          console.log('Redirecting to login');
-          window.location.href = '/login';
-        }
-        return Promise.reject(axiosError);
-      }
-    }
-
-    return Promise.reject(error);
-  },
-);
-
-// Auth types
 export interface LoginData {
   email: string;
   password: string;
@@ -91,11 +20,6 @@ export interface RegisterData extends LoginData {
   lastName: string;
 }
 
-export interface AuthResponse {
-  user: User;
-}
-
-// User types
 export interface User {
   id: number;
   email: string;
@@ -106,7 +30,10 @@ export interface User {
   updatedAt: string;
 }
 
-// Add these interfaces
+export interface AuthResponse {
+  user: User;
+}
+
 export interface PaginationParams {
   page: number;
   limit: number;
