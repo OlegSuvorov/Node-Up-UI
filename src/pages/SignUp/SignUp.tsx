@@ -61,6 +61,8 @@ function SignUp() {
       password: '',
     },
     validationSchema,
+    validateOnBlur: false,
+    // validateOnChange: false,
     onSubmit: async (values) => {
       setServerError('');
       try {
@@ -163,7 +165,7 @@ function SignUp() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={formik.isSubmitting}
+            disabled={formik.isSubmitting || !formik.dirty || !formik.isValid}
           >
             {formik.isSubmitting ? 'Signing up...' : 'Sign Up'}
           </Button>
